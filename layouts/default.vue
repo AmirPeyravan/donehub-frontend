@@ -10,6 +10,9 @@
         <NuxtLink to="/profile" class="flex items-center space-x-3 text-light-gray hover:text-primary transition-colors">
           <span>Profile</span>
         </NuxtLink>
+        <NuxtLink to="/profile/settings" class="flex items-center space-x-3 text-light-gray hover:text-primary transition-colors">
+          <span>Settings</span>
+        </NuxtLink>
         <NuxtLink v-if="authStore.isAdmin" to="/admin/users" class="flex items-center space-x-3 text-light-gray hover:text-primary transition-colors">
           <span>User Management</span>
         </NuxtLink>
@@ -27,7 +30,6 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '~/store/auth';
 const authStore = useAuthStore();
 </script>
 

@@ -37,6 +37,11 @@
       <AppButton type="submit" class="w-full mt-4" :disabled="loading">
         {{ loading ? 'Logging in...' : 'Login' }}
       </AppButton>
+      <div class="text-center mt-4">
+        <button @click="sendOtp" class="text-primary hover:underline text-sm" :disabled="loading">
+          Send OTP instead
+        </button>
+      </div>
     </FormKit>
 
     <!-- Step 3: Register with OTP -->
@@ -66,6 +71,26 @@
       </AppButton>
     </FormKit>
 
+    <!-- Step 4: Login with OTP -->
+    <FormKit
+      v-if="step === 'login-otp'"
+      type="form"
+      @submit="handleLoginOtp"
+      :actions="false"
+    >
+      <p class="text-center mb-4 text-dark-gray">An OTP has been sent to {{ identifier }}.</p>
+      <FormKit
+        type="text"
+        name="otp"
+        label="OTP Code"
+        placeholder="Enter the 6-digit code"
+        validation="required|length:6,6"
+      />
+      <AppButton type="submit" class="w-full mt-4" :disabled="loading">
+        {{ loading ? 'Logging in...' : 'Login' }}
+      </AppButton>
+    </FormKit>
+
     <div v-if="error" class="mt-4 text-red-500 text-center">
       {{ error }}
     </div>
@@ -74,8 +99,6 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useApi } from '~/composables/useApi';
-import { useAuthStore } from '~/store/auth';
 
 definePageMeta({
   layout: 'auth',
@@ -94,24 +117,23 @@ const handleCheckUser = async (formData) => {
   error.value = null;
   identifier.value = formData.identifier;
 
-  const { data, error: apiError } = await useApi('/auth/check-user', {
-    method: 'POST',
-    body: { identifier: formData.identifier },
-  });
+  try {
+    const data = await useApi('/auth/check-user', {
+      method: 'POST',
+      body: { identifier: formData.identifier },
+    });
 
-  if (apiError.value) {
-    error.value = apiError.value.data?.message || 'An error occurred.';
+    if (data?.exists) {
+      step.value = 'login-password';
+    } else {
+      await sendOtp();
+      step.value = 'register-otp';
+    }
+  } catch (err) {
+    error.value = err.data?.message || 'An error occurred.';
+  } finally {
     loading.value = false;
-    return;
   }
-
-  if (data.value?.exists) {
-    step.value = 'login-password';
-  } else {
-    await sendOtp();
-    step.value = 'register-otp';
-  }
-  loading.value = false;
 };
 
 const sendOtp = async () => {
@@ -119,51 +141,73 @@ const sendOtp = async () => {
     method: 'POST',
     body: { identifier: identifier.value },
   });
+  step.value = 'login-otp';
 };
 
 const handleLoginPassword = async (formData) => {
   loading.value = true;
   error.value = null;
 
-  const { data, error: apiError } = await useApi('/auth/login-password', {
-    method: 'POST',
-    body: {
-      identifier: identifier.value,
-      password: formData.password,
-    },
-  });
+  try {
+    const data = await useApi('/auth/login-password', {
+      method: 'POST',
+      body: {
+        identifier: identifier.value,
+        password: formData.password,
+      },
+    });
 
-  if (apiError.value) {
-    error.value = apiError.value.data?.message || 'Invalid credentials.';
+    authStore.setTokens(data.access_token, data.refresh_token);
+    await router.push('/profile');
+  } catch (err) {
+    error.value = err.data?.message || 'Invalid credentials.';
+  } finally {
     loading.value = false;
-    return;
   }
+};
 
-  authStore.setTokens(data.value.access_token, data.value.refresh_token);
-  // We'll fetch the user in the middleware or on the profile page
-  await router.push('/profile');
+const handleLoginOtp = async (formData) => {
+  loading.value = true;
+  error.value = null;
+
+  try {
+    const data = await useApi('/auth/verify-otp', {
+      method: 'POST',
+      body: {
+        identifier: identifier.value,
+        otp: formData.otp,
+      },
+    });
+
+    authStore.setTokens(data.access_token, data.refresh_token);
+    await router.push('/profile');
+  } catch (err) {
+    error.value = err.data?.message || 'Invalid OTP.';
+  } finally {
+    loading.value = false;
+  }
 };
 
 const handleRegister = async (formData) => {
   loading.value = true;
   error.value = null;
 
-  const { data, error: apiError } = await useApi('/auth/verify-otp', {
-    method: 'POST',
-    body: {
-      identifier: identifier.value,
-      name: formData.name,
-      otp: formData.otp,
-    },
-  });
+  try {
+    const data = await useApi('/auth/verify-otp', {
+      method: 'POST',
+      body: {
+        identifier: identifier.value,
+        name: formData.name,
+        otp: formData.otp,
+      },
+    });
 
-  if (apiError.value) {
-    error.value = apiError.value.data?.message || 'Invalid OTP or data.';
+    authStore.setTokens(data.access_token, data.refresh_token);
+    await router.push('/profile');
+  } catch (err) {
+    error.value = err.data?.message || 'Invalid OTP or data.';
+  } finally {
     loading.value = false;
-    return;
   }
-
-  authStore.setTokens(data.value.access_token, data.value.refresh_token);
-  await router.push('/profile');
 };
 </script>

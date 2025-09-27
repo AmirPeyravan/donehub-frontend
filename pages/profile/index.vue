@@ -4,22 +4,43 @@
     <div v-if="loading" class="text-center">
       <p>Loading profile...</p>
     </div>
-    <div v-else-if="user" class="space-y-4">
-      <div>
-        <label class="text-dark-gray">Name</label>
-        <p class="text-lg">{{ user.name }}</p>
+    <div v-else-if="user" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="text-dark-gray text-sm">Name</label>
+          <p class="text-lg text-light-gray">{{ user.name }}</p>
+        </div>
+        <div>
+          <label class="text-dark-gray text-sm">Email</label>
+          <p class="text-lg text-light-gray">{{ user.email || 'Not provided' }}</p>
+        </div>
+        <div>
+          <label class="text-dark-gray text-sm">Username</label>
+          <p class="text-lg text-light-gray">{{ user.username || 'Not set' }}</p>
+        </div>
+        <div>
+          <label class="text-dark-gray text-sm">Phone</label>
+          <p class="text-lg text-light-gray">{{ user.phone || 'Not provided' }}</p>
+        </div>
       </div>
-      <div>
-        <label class="text-dark-gray">Email</label>
-        <p class="text-lg">{{ user.email || 'Not provided' }}</p>
+      
+      <div v-if="user.roles && user.roles.length > 0">
+        <label class="text-dark-gray text-sm">Roles</label>
+        <div class="flex gap-2 mt-2">
+          <span v-for="role in user.roles" :key="role.id" class="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm">
+            {{ role.display_name }}
+          </span>
+        </div>
       </div>
-      <div>
-        <label class="text-dark-gray">Username</label>
-        <p class="text-lg">{{ user.username || 'Not set' }}</p>
+
+      <div class="flex gap-4 mt-6">
+        <NuxtLink to="/profile/settings">
+          <AppButton>Edit Profile</AppButton>
+        </NuxtLink>
+        <AppButton @click="handleLogout" variant="secondary">
+          Logout
+        </AppButton>
       </div>
-      <AppButton @click="handleLogout" variant="secondary" class="mt-6">
-        Logout
-      </AppButton>
     </div>
     <div v-else class="text-center text-red-500">
       <p>Could not load user profile.</p>
@@ -29,8 +50,6 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useAuthStore } from '~/store/auth';
-import { useApi } from '~/composables/useApi';
 
 definePageMeta({
   middleware: 'auth',
@@ -49,19 +68,30 @@ const fetchUser = async () => {
   }
 
   loading.value = true;
-  const { data, error } = await useApi('/auth/user');
-  if (data.value) {
-    authStore.setUser(data.value);
-    user.value = data.value;
+  try {
+    const userData = await useApi('/auth/user');
+    if (userData) {
+      authStore.setUser(userData);
+      user.value = userData;
+    }
+  } catch (error) {
+    console.error('Failed to fetch user:', error);
+  } finally {
+    loading.value = false;
   }
-  loading.value = false;
 };
 
 const handleLogout = async () => {
-  // We should also call the /api/auth/logout endpoint
-  await useApi('/auth/logout', { method: 'POST' });
-  authStore.logout();
-  router.push('/auth/login');
+  try {
+    // Call the logout endpoint
+    await useApi('/auth/logout', { method: 'POST' });
+  } catch (error) {
+    console.error('Logout API call failed:', error);
+  } finally {
+    // Always logout locally
+    authStore.logout();
+    await router.push('/auth/login');
+  }
 };
 
 onMounted(fetchUser);

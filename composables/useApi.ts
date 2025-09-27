@@ -1,15 +1,12 @@
-import { ofetch } from 'ofetch'
-import { useAuthStore } from '~/stores/auth'
-
 // A flag to prevent multiple parallel refresh attempts
 let isRefreshing = false
 
-// Create a custom ofetch instance
-const apiFetch = ofetch.create({
+// Create a custom $fetch wrapper
+export const useApi = $fetch.create({
   baseURL: '/api',
 
   // Interceptor to automatically add the Authorization header
-  async onRequest({ options }) {
+  onRequest({ options }) {
     const authStore = useAuthStore()
     if (authStore.accessToken) {
       options.headers = new Headers(options.headers)
@@ -28,8 +25,8 @@ const apiFetch = ofetch.create({
         isRefreshing = true
         try {
           // Attempt to refresh the token
-          const { access_token, refresh_token } = await ofetch<{access_token: string, refresh_token: string}>('/auth/refresh', {
-            baseURL: '/api', // Ensure baseURL is correctly set for this direct call
+          const { access_token, refresh_token } = await $fetch<{access_token: string, refresh_token: string}>('/auth/refresh', {
+            baseURL: '/api',
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${authStore.refreshToken}`
@@ -45,28 +42,22 @@ const apiFetch = ofetch.create({
           options.headers = newHeaders;
 
           // Retry the original request with the new token
-          // This will transparently resolve the original promise
-          return ofetch(request, options);
+          return $fetch(request, options);
 
         } catch (e) {
           // If the refresh fails, logout the user completely
           authStore.logout()
           if (typeof window !== 'undefined') {
-            window.location.href = '/auth/login'; // Force a full page redirect
+            await navigateTo('/auth/login')
           }
           return Promise.reject(e);
         } finally {
           isRefreshing = false
         }
       } else {
-        // If a refresh is already in progress, you would ideally queue the request.
-        // For this simplified but robust implementation, we let the request fail,
-        // and a subsequent user action will benefit from the new token.
+        // If a refresh is already in progress, let the request fail
         return Promise.reject(response)
       }
     }
   }
 })
-
-// The new composable simply exports the customized fetch instance
-export const useApi = apiFetch;

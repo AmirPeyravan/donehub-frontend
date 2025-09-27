@@ -7,14 +7,26 @@ interface Role {
   display_name: string;
 }
 
+interface Permission {
+  id: number;
+  name: string;
+  display_name: string;
+  group: string;
+}
+
 interface User {
   id: number;
   name: string;
   username: string | null;
   email: string | null;
+  phone: string | null;
+  email_verified_at: string | null;
+  phone_verified_at: string | null;
+  avatar_url: string | null;
   is_admin: boolean;
+  has_password: boolean;
   roles: Role[];
-  // Add other user fields as needed
+  permissions: Permission[];
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -27,7 +39,7 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isLoggedIn: (state) => !!state.accessToken && !!state.user,
+    isLoggedIn: (state): boolean => !!state.accessToken && !!state.user,
 
     /**
      * Checks if the user is an administrator.
@@ -44,6 +56,23 @@ export const useAuthStore = defineStore('auth', {
       }
       // Fallback to checking the roles array for an 'admin' role.
       return state.user.roles?.some(role => role.name === 'admin') ?? false;
+    },
+
+    /**
+     * Check if user has a specific permission
+     */
+    hasPermission: (state) => (permission: string): boolean => {
+      if (!state.user) return false;
+      if (state.user.is_admin) return true; // Admins have all permissions
+      return state.user.permissions?.some(p => p.name === permission) ?? false;
+    },
+
+    /**
+     * Check if user has a specific role
+     */
+    hasRole: (state) => (roleName: string): boolean => {
+      if (!state.user) return false;
+      return state.user.roles?.some(role => role.name === roleName) ?? false;
     }
   },
 

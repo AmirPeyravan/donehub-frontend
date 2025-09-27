@@ -1,33 +1,47 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
+  
+  // Enable experimental features for Nuxt 4
+  future: {
+    compatibilityVersion: 4,
+  },
 
   modules: [
     '@nuxtjs/tailwindcss',
     '@formkit/nuxt',
-    '@pinia/nuxt' // اضافه کردن Pinia
+    '@pinia/nuxt'
   ],
 
   tailwindcss: {
-    cssPath: '@/assets/css/main.css',
+    cssPath: '~/assets/css/main.css',
   },
 
-  // Proxy configuration to forward /api requests to the backend
-  routeRules: {
-    '/api/**': {
-      // Replace with your actual backend URL
-      proxy: 'http://localhost:8000/api/**',
-    },
-  },
-
-  // This is needed to make the proxy work on the server side
+  // Update proxy configuration for Nuxt 4
   nitro: {
     devProxy: {
-      '/api/**': {
-        target: 'http://localhost:8000/api/**',
+      '/api': {
+        target: 'http://localhost:8000/api',
         changeOrigin: true,
+        prependPath: true,
       },
     },
   },
+
+  // Add TypeScript configuration
+  typescript: {
+    typeCheck: true
+  },
+
+  // Add app configuration
+  app: {
+    head: {
+      title: 'DoneHub',
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' }
+      ]
+    }
+  }
 })
