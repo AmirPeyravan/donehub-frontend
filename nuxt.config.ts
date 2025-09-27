@@ -5,7 +5,8 @@ export default defineNuxtConfig({
 
   modules: [
     '@nuxtjs/tailwindcss',
-    '@formkit/nuxt'
+    '@formkit/nuxt',
+    '@pinia/nuxt' // اضافه کردن Pinia
   ],
 
   tailwindcss: {

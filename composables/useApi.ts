@@ -1,5 +1,5 @@
 import { ofetch } from 'ofetch'
-import { useAuthStore } from '~/store/auth'
+import { useAuthStore } from '~/stores/auth'
 
 // A flag to prevent multiple parallel refresh attempts
 let isRefreshing = false
