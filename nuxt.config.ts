@@ -8,7 +8,7 @@ export default defineNuxtConfig({
     '@formkit/nuxt'
   ],
 
-  css: ['~/assets/css/main.css'],
+  css: ['@/assets/css/main.css'],
 
   // Proxy configuration to forward /api requests to the backend
   routeRules: {
