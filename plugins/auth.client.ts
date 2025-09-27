@@ -1,3 +1,5 @@
+import { useAuthStore } from '~/stores/auth'
+
 export default defineNuxtPlugin(async (nuxtApp) => {
   const authStore = useAuthStore()
 
@@ -18,8 +20,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         }
       })
       
-      if (user) {
-        authStore.setUser(user)
+      // Check if user data is valid
+      if (user && typeof user === 'object' && 'id' in user) {
+        authStore.setUser(user as any)
       } else {
         // If user fetch fails (e.g., token expired and refresh failed), logout.
         authStore.logout()
