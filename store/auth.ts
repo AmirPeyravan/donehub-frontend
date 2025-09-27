@@ -17,19 +17,13 @@ interface User {
   // Add other user fields as needed
 }
 
-// Helper function to safely get items from localStorage
-const getFromLocalStorage = (key: string) => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem(key)
-  }
-  return null
-}
-
 export const useAuthStore = defineStore('auth', {
+  // STATE: Initial state must be the same on server and client.
+  // We will restore the session from localStorage in a client-side plugin.
   state: () => ({
     user: null as User | null,
-    accessToken: getFromLocalStorage('accessToken'),
-    refreshToken: getFromLocalStorage('refreshToken'),
+    accessToken: null as string | null,
+    refreshToken: null as string | null,
   }),
 
   getters: {
