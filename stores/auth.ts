@@ -1,20 +1,20 @@
 import { defineStore } from 'pinia'
 
 // Define proper types based on the API documentation
-interface Role {
+export interface Role {
   id: number;
   name: string;
   display_name: string;
 }
 
-interface Permission {
+export interface Permission {
   id: number;
   name: string;
   display_name: string;
   group: string;
 }
 
-interface User {
+export interface User {
   id: number;
   name: string;
   username: string | null;

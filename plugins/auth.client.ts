@@ -1,9 +1,9 @@
-import { useAuthStore } from '~/stores/auth';
+import { useAuthStore, type User } from '~/stores/auth';
 
 export default defineNuxtPlugin({
   name: 'auth-rehydration',
-  async setup(nuxtApp) {
-    const authStore = useAuthStore(nuxtApp.$pinia);
+  async setup() {
+    const authStore = useAuthStore();
 
     // Skip rehydration if already authenticated (e.g., during SSR or CSR navigation)
     if (authStore.isLoggedIn) {
@@ -19,13 +19,12 @@ export default defineNuxtPlugin({
 
       try {
         // Fetch user data to confirm token validity and rehydrate user state
-        const user = await useApi('/auth/user');
+        const user = await useApi<User>('/auth/user');
         authStore.setUser(user);
       } catch (error) {
         console.error('Session restore failed:', error);
         // If fetching user fails, the token is likely expired or invalid.
         // The `useApi` interceptor will handle token refresh or logout.
-        // We can also force a logout here if needed.
         authStore.logout();
       }
     }
