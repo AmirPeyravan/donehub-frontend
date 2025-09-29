@@ -5,6 +5,7 @@
         <li><NuxtLink to="/">خانه</NuxtLink></li>
         <li><NuxtLink to="/products">محصولات</NuxtLink></li>
         <li><NuxtLink to="/contact">ارتباط با ما</NuxtLink></li>
+        <li><NuxtLink to="/description">توضیحات</NuxtLink></li>
       </ul>
     </nav>
   </header>
