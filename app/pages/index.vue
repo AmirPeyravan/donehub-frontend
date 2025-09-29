@@ -1,29 +1,33 @@
 <template>
-  <div class="container">
-    <h1 class="title">به پروژه من خوش آمدید</h1>
-    <p class="subtitle">این یک صفحه اصلی زیبا با تم بنفش است.</p>
-    <nav class="navigation">
-      <NuxtLink to="/dashboard">
-        <button class="btn btn-primary">داشبورد</button>
-      </NuxtLink>
-      <NuxtLink to="/auth">
-        <button class="btn btn-secondary">ورود و ثبت‌نام</button>
-      </NuxtLink>
-    </nav>
+  <div class="page-container">
+    <div class="container">
+      <img src="/purple-monster.png" alt="Cute Purple Monster" class="monster-image" />
+      <h1 class="title">به پروژه من خوش آمدید</h1>
+      <p class="subtitle">این یک صفحه اصلی زیبا با تم بنفش است.</p>
+      <nav class="navigation">
+        <NuxtLink to="/dashboard">
+          <button class="btn btn-primary">داشبورد</button>
+        </NuxtLink>
+        <NuxtLink to="/auth">
+          <button class="btn btn-secondary">ورود و ثبت‌نام</button>
+        </NuxtLink>
+      </nav>
+    </div>
   </div>
 </template>
 
-<style>
-/* Global styles for a modern look */
-body {
+<style scoped>
+/* Scoped styles for the index page */
+.page-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: #f0f2f5;
   color: #333;
-  margin: 0;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .container {
@@ -32,6 +36,11 @@ body {
   padding: 50px;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.monster-image {
+  width: 150px;
+  margin-bottom: 20px;
 }
 
 .title {
