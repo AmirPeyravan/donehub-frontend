@@ -4,7 +4,7 @@ import { useAuthStore } from '~/stores/auth'
 let isRefreshing = false
 
 export const useApi = $fetch.create({
-  baseURL: '/api',
+  baseURL: '/api/v1',
 
   onRequest({ options }) {
     const authStore = useAuthStore()
@@ -21,7 +21,7 @@ export const useApi = $fetch.create({
       if (!isRefreshing) {
         isRefreshing = true
         try {
-          const { access_token, refresh_token } = await $fetch<{ access_token: string; refresh_token: string }>('/auth/refresh', {
+          const { access_token, refresh_token } = await $fetch<{ access_token: string; refresh_token: string }>('/v1/auth/refresh', {
             baseURL: '/api',
             method: 'POST',
             headers: {
