@@ -7,9 +7,9 @@
 ## ۱. اطلاعات کلی
 
 ### URL پایه (Base URL)
-تمامی آدرس‌های API که در این مستند ذکر شده‌اند، به دنبال URL پایه برنامه شما قرار می‌گیرند. پیشوند اصلی این ماژول `/api/auth` است.
+تمامی آدرس‌های API که در این مستند ذکر شده‌اند، به دنبال URL پایه برنامه شما قرار می‌گیرند. پیشوند اصلی این ماژول `/api/v1/auth` است.
 ```
-/api/auth
+/api/v1/auth
 ```
 
 ### احراز هویت (Authentication)
@@ -23,27 +23,27 @@ Authorization: Bearer <YOUR_ACCESS_TOKEN>
 ## ۲. جریان احراز هویت عمومی
 
 ### ۲.۱. بررسی وجود کاربر
-- **متد:** `POST` | **آدرس:** `/api/auth/check-user`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/check-user`
 - **توضیح:** بررسی می‌کند آیا کاربری با شناسه (ایمیل/موبایل) وجود دارد.
 - **درخواست:** `{ "identifier": "user@example.com" }`
 
 ### ۲.۲. ارسال کد یکبار مصرف (OTP)
-- **متد:** `POST` | **آدرس:** `/api/auth/send-otp`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/send-otp`
 - **توضیح:** کد OTP را به شناسه کاربر ارسال می‌کند.
 - **درخواست:** `{ "identifier": "user@example.com" }`
 
 ### ۲.۳. تایید کد یکبار مصرف (ورود/ثبت‌نام)
-- **متد:** `POST` | **آدرس:** `/api/auth/verify-otp`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/verify-otp`
 - **توضیح:** کد OTP را تایید کرده و در صورت نیاز کاربر جدید می‌سازد.
 - **درخواست:** `{ "identifier": "user@example.com", "otp": "123456", "name": "نام کاربر" }`
 
 ### ۲.۴. ورود با رمز عبور
-- **متد:** `POST` | **آدرس:** `/api/auth/login-password`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/login-password`
 - **توضیح:** ورود با استفاده از شناسه و رمز عبور.
 - **درخواست:** `{ "identifier": "user@example.com", "password": "user_password" }`
 
 ### ۲.۵. تازه‌سازی توکن (Refresh Token)
-- **متد:** `POST` | **آدرس:** `/api/auth/refresh`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/refresh`
 - **توضیح:** دریافت `access_token` جدید با استفاده از `refresh_token`. (نیاز به احراز هویت با `refresh_token`)
 
 ---
@@ -52,33 +52,33 @@ Authorization: Bearer <YOUR_ACCESS_TOKEN>
 (نیاز به احراز هویت با `access_token`)
 
 ### ۳.۱. دریافت اطلاعات کاربر
-- **متد:** `GET` | **آدرس:** `/api/auth/user`
+- **متد:** `GET` | **آدرس:** `/api/v1/auth/user`
 
 ### ۳.۲. خروج از حساب کاربری
-- **متد:** `POST` | **آدرس:** `/api/auth/logout`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/logout`
 
 ### ۳.۳. خروج از تمام دستگاه‌ها
-- **متد:** `POST` | **آدرس:** `/api/auth/logout-all`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/logout-all`
 
 ### ۳.۴. به‌روزرسانی پروفایل
-- **متد:** `POST` | **آدرس:** `/api/auth/profile/update`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/profile/update`
 - **درخواست:** `{ "name": "نام جدید", "username": "new_username", ... }`
 
 ### ۳.۵. تنظیم رمز عبور
-- **متد:** `POST` | **آدرس:** `/api/auth/password/set`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/password/set`
 - **درخواست:** `{ "password": "...", "password_confirmation": "..." }`
 
 ### ۳.۶. تغییر رمز عبور
-- **متد:** `POST` | **آدرس:** `/api/auth/password/update`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/password/update`
 - **درخواست:** `{ "current_password": "...", "password": "...", "password_confirmation": "..." }`
 
 ### ۳.۷. ارسال و تایید ایمیل
-- `POST /api/auth/email/send-verification` | **درخواست:** `{ "email": "..." }`
-- `POST /api/auth/email/verify` | **درخواست:** `{ "email": "...", "otp": "..." }`
+- `POST /api/v1/auth/email/send-verification` | **درخواست:** `{ "email": "..." }`
+- `POST /api/v1/auth/email/verify` | **درخواست:** `{ "email": "...", "otp": "..." }`
 
 ### ۳.۸. ارسال و تایید موبایل
-- `POST /api/auth/phone/send-verification` | **درخواست:** `{ "phone": "..." }`
-- `POST /api/auth/phone/verify` | **درخواست:** `{ "phone": "...", "otp": "..." }`
+- `POST /api/v1/auth/phone/send-verification` | **درخواست:** `{ "phone": "..." }`
+- `POST /api/v1/auth/phone/verify` | **درخواست:** `{ "phone": "...", "otp": "..." }`
 
 ---
 
@@ -86,33 +86,33 @@ Authorization: Bearer <YOUR_ACCESS_TOKEN>
 (نیاز به احراز هویت و دسترسی ادمین)
 
 ### ۴.۱. لیست کاربران
-- **متد:** `GET` | **آدرس:** `/api/auth/users`
+- **متد:** `GET` | **آدرس:** `/api/v1/auth/users`
 - **توضیح:** دریافت لیست کاربران با فیلتر، مرتب‌سازی و صفحه‌بندی.
 - **پارامترها:** `search`, `sort_by`, `sort_order`, `per_page`, `page`
 
 ### ۴.۲. آمار کاربران
-- **متد:** `GET` | **آدرس:** `/api/auth/users/statistics`
+- **متد:** `GET` | **آدرس:** `/api/v1/auth/users/statistics`
 
 ### ۴.۳. نمایش کاربر خاص
-- **متد:** `GET` | **آدرس:** `/api/auth/users/{id}`
+- **متد:** `GET` | **آدرس:** `/api/v1/auth/users/{id}`
 
 ### ۴.۴. به‌روزرسانی کاربر
-- **متد:** `PUT` | **آدرس:** `/api/auth/users/{id}`
+- **متد:** `PUT` | **آدرس:** `/api/v1/auth/users/{id}`
 - **درخواست:** `{ "name": "...", "email": "...", ... }`
 
 ### ۴.۵. حذف کاربر
-- **متد:** `DELETE` | **آدرس:** `/api/auth/users/{id}`
+- **متد:** `DELETE` | **آدرس:** `/api/v1/auth/users/{id}`
 
 ### ۴.۶. قفل/آزاد کردن حساب
-- **متد:** `POST` | **آدرس:** `/api/auth/users/{id}/toggle-lock`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/users/{id}/toggle-lock`
 
 ### ۴.۷. بازنشانی رمز عبور
-- **متد:** `POST` | **آدرس:** `/api/auth/users/{id}/reset-password`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/users/{id}/reset-password`
 - **درخواست:** `{ "password": "...", "password_confirmation": "..." }`
 
 ### ۴.۸. تایید دستی ایمیل/موبایل
-- `POST /api/auth/users/{id}/verify-email`
-- `POST /api/auth/users/{id}/verify-phone`
+- `POST /api/v1/auth/users/{id}/verify-email`
+- `POST /api/v1/auth/users/{id}/verify-phone`
 
 ---
 
@@ -120,33 +120,33 @@ Authorization: Bearer <YOUR_ACCESS_TOKEN>
 (نیاز به احراز هویت و دسترسی ادمین)
 
 ### ۵.۱. لیست نقش‌ها
-- **متد:** `GET` | **آدرس:** `/api/auth/roles`
+- **متد:** `GET` | **آدرس:** `/api/v1/auth/roles`
 - **توضیح:** لیست تمام نقش‌ها را برمی‌گرداند.
 
 ### ۵.۲. ایجاد نقش جدید
-- **متد:** `POST` | **آدرس:** `/api/auth/roles`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/roles`
 - **دسترسی:** `roles.create`
 - **درخواست:** `{ "name": "new_role", "display_name": "New Role", "permission_ids": [1, 2] }`
 
 ### ۵.۳. نمایش نقش خاص
-- **متد:** `GET` | **آدرس:** `/api/auth/roles/{id}`
+- **متد:** `GET` | **آدرس:** `/api/v1/auth/roles/{id}`
 
 ### ۵.۴. به‌روزرسانی نقش
-- **متد:** `PUT` | **آدرس:** `/api/auth/roles/{id}`
+- **متد:** `PUT` | **آدرس:** `/api/v1/auth/roles/{id}`
 - **دسترسی:** `roles.edit`
 - **درخواست:** `{ "display_name": "Updated Name", "description": "..." }`
 
 ### ۵.۵. حذف نقش
-- **متد:** `DELETE` | **آدرس:** `/api/auth/roles/{id}`
+- **متد:** `DELETE` | **آدرس:** `/api/v1/auth/roles/{id}`
 - **دسترسی:** `roles.delete`
 
 ### ۵.۶. اختصاص/حذف نقش به کاربر
 - **دسترسی:** `users.manage_roles`
-- `POST /api/auth/roles/user/{userId}/assign` | **درخواست:** `{ "role_id": ... }`
-- `POST /api/auth/roles/user/{userId}/remove` | **درخواست:** `{ "role_id": ... }`
+- `POST /api/v1/auth/roles/user/{userId}/assign` | **درخواست:** `{ "role_id": ... }`
+- `POST /api/v1/auth/roles/user/{userId}/remove` | **درخواست:** `{ "role_id": ... }`
 
 ### ۵.۷. دریافت کاربران یک نقش
-- **متد:** `GET` | **آدرس:** `/api/auth/roles/{id}/users`
+- **متد:** `GET` | **آدرس:** `/api/v1/auth/roles/{id}/users`
 
 ---
 
@@ -154,29 +154,29 @@ Authorization: Bearer <YOUR_ACCESS_TOKEN>
 (نیاز به احراز هویت و دسترسی ادمین)
 
 ### ۶.۱. لیست دسترسی‌ها
-- **متد:** `GET` | **آدرس:** `/api/auth/permissions`
+- **متد:** `GET` | **آدرس:** `/api/v1/auth/permissions`
 - **توضیح:** لیست تمام دسترسی‌ها را به صورت گروه‌بندی شده برمی‌گرداند.
 
 ### ۶.۲. ایجاد دسترسی جدید
-- **متد:** `POST` | **آدرس:** `/api/auth/permissions`
+- **متد:** `POST` | **آدرس:** `/api/v1/auth/permissions`
 - **دسترسی:** `roles.edit`
 - **درخواست:** `{ "name": "posts.create", "display_name": "Create Posts", "group": "Posts" }`
 
 ### ۶.۳. به‌روزرسانی دسترسی
-- **متد:** `PUT` | **آدرس:** `/api/auth/permissions/{id}`
+- **متد:** `PUT` | **آدرس:** `/api/v1/auth/permissions/{id}`
 - **دسترسی:** `roles.edit`
 - **درخواست:** `{ "display_name": "...", "group": "...", "description": "..." }`
 
 ### ۶.۴. حذف دسترسی
-- **متد:** `DELETE` | **آدرس:** `/api/auth/permissions/{id}`
+- **متد:** `DELETE` | **آدرس:** `/api/v1/auth/permissions/{id}`
 - **دسترسی:** `roles.edit`
 
 ### ۶.۵. دریافت دسترسی‌های یک نقش
-- **متد:** `GET` | **آدرس:** `/api/auth/permissions/role/{roleId}`
+- **متد:** `GET` | **آدرس:** `/api/v1/auth/permissions/role/{roleId}`
 - **توضیح:** لیست دسترسی‌های اختصاص داده شده به یک نقش خاص را برمی‌گرداند.
 
 ### ۶.۶. به‌روزرسانی دسترسی‌های یک نقش
-- **متد:** `PUT` | **آدرس:** `/api/auth/permissions/role/{roleId}`
+- **متد:** `PUT` | **آدرس:** `/api/v1/auth/permissions/role/{roleId}`
 - **دسترسی:** `roles.edit`
 - **توضیح:** لیست دسترسی‌های یک نقش را جایگزین می‌کند.
 - **درخواست:** `{ "permission_ids": [1, 2, 3] }`
