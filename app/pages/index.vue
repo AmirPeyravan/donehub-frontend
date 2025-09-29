@@ -3,6 +3,26 @@
     <div class="container">
       <img src="/purple-monster.png" alt="Cute Purple Monster" class="monster-image" />
       <h1 class="title">به پروژه من خوش آمدید</h1>
+
+      <!-- Inline SVG for the animated rabbit -->
+      <div class="rabbit-container">
+        <svg viewBox="0 0 100 100" class="rabbit-svg">
+          <g>
+            <!-- Body -->
+            <ellipse cx="50" cy="70" rx="30" ry="20" fill="#a78bfa"/>
+            <!-- Head -->
+            <circle cx="75" cy="55" r="15" fill="#a78bfa"/>
+            <!-- Ears -->
+            <ellipse cx="70" cy="35" rx="5" ry="15" fill="#a78bfa" transform="rotate(-20 70 35)"/>
+            <ellipse cx="80" cy="35" rx="5" ry="15" fill="#a78bfa" transform="rotate(20 80 35)"/>
+            <!-- Eye -->
+            <circle cx="78" cy="53" r="2" fill="white"/>
+            <!-- Tail -->
+            <circle cx="20" cy="65" r="8" fill="white"/>
+          </g>
+        </svg>
+      </div>
+
       <p class="subtitle">این یک صفحه اصلی زیبا با تم بنفش است.</p>
       <nav class="navigation">
         <NuxtLink to="/dashboard">
@@ -53,6 +73,25 @@
   font-size: 1.2rem;
   color: #666;
   margin-bottom: 30px;
+}
+
+.rabbit-container {
+  width: 150px;
+  margin: 20px auto;
+}
+
+.rabbit-svg {
+  width: 100%;
+  animation: hop 0.8s infinite ease-in-out;
+}
+
+@keyframes hop {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
 }
 
 .navigation {
