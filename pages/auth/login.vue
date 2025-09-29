@@ -49,7 +49,8 @@ const handleLogin = async (formData) => {
   error.value = null;
 
   try {
-    const data = await $fetch('/api/v1/auth/login-password', {
+    // Step 1: Log in and get tokens
+    const tokens = await useApi('/auth/login-password', {
       method: 'POST',
       body: {
         identifier: formData.identifier,
@@ -57,12 +58,18 @@ const handleLogin = async (formData) => {
       },
     });
 
-    authStore.setTokens(data.access_token, data.refresh_token);
+    // Step 2: Set tokens in the store
+    authStore.setTokens(tokens.access_token, tokens.refresh_token);
+
+    // Step 3: Fetch user profile
+    const user = await useApi('/auth/user');
+    authStore.setUser(user);
     
+    // Step 4: Redirect to the intended page or profile
     const redirect = String(route.query.redirect || '/profile');
     await router.push(redirect);
   } catch (err) {
-    error.value = err.data?.message || 'Invalid credentials.';
+    error.value = err.data?.message || 'An error occurred during login.';
   } finally {
     loading.value = false;
   }

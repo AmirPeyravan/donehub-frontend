@@ -1,9 +1,14 @@
-import { useAuthStore } from '~/stores/auth'
-
-export default defineNuxtRouteMiddleware((to) => {
-  const authStore = useAuthStore()
+export default defineNuxtRouteMiddleware((to, from) => {
+  const authStore = useAuthStore();
 
   if (!authStore.isLoggedIn) {
-    return navigateTo(`/auth/login?redirect=${encodeURIComponent(to.fullPath)}`)
+    // If the user is not logged in, redirect to the login page.
+    // Include the original destination in the query `redirect` to send them back after login.
+    return navigateTo({
+      path: '/auth/login',
+      query: {
+        redirect: to.fullPath,
+      },
+    });
   }
-})
+});
