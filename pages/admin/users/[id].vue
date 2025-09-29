@@ -1,132 +1,168 @@
 <template>
-  <div class="p-8 rounded-lg bg-dark-bg/50 border border-gray-800">
-    <div v-if="pending" class="text-center">
-      <p>Loading user data...</p>
-    </div>
-    <div v-else-if="error" class="text-center text-red-500">
-      <p>Failed to load user. The user may not exist or you lack permissions.</p>
-      <NuxtLink to="/admin/users" class="text-primary hover:underline mt-4">Back to User List</NuxtLink>
-    </div>
+  <div>
+    <div v-if="pending" class="text-center">{{ $t('loading') }}</div>
+    <div v-else-if="error" class="text-center text-red-500">{{ $t('user_fetch_error') }}</div>
     <div v-else-if="user">
-      <h1 class="text-3xl font-bold text-primary mb-6">Edit User: {{ user.name }}</h1>
+      <h1 class="text-2xl font-bold mb-6">{{ $t('edit_user_title', { name: user.name }) }}</h1>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Edit Form -->
-        <div class="lg:col-span-2">
-          <h2 class="text-xl font-semibold text-secondary mb-4">User Details</h2>
+      <!-- Edit User Form -->
+      <FormKit
+        type="form"
+        v-model="formData"
+        @submit="handleUpdateUser"
+        :actions="false"
+        #default="{ value }"
+      >
+        <h2 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">{{ $t('user_details') }}</h2>
+        <FormKit
+          type="text"
+          name="name"
+          :label="$t('user_name')"
+          validation="required"
+        />
+        <FormKit
+          type="email"
+          name="email"
+          :label="$t('user_email')"
+          validation="required|email"
+        />
+        <FormKit
+          type="text"
+          name="username"
+          :label="$t('user_username')"
+        />
+
+        <AppButton type="submit" class="mt-4" :disabled="loading">
+          {{ loading ? $t('loading') : $t('save_changes') }}
+        </AppButton>
+        <div v-if="updateError" class="mt-4 text-red-500">{{ updateError }}</div>
+        <div v-if="updateSuccess" class="mt-4 text-green-500">{{ updateSuccess }}</div>
+      </FormKit>
+
+      <!-- Role Management Form -->
+      <div class="mt-8">
+        <h2 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">{{ $t('manage_user_roles') }}</h2>
+        <FormKit
+          type="form"
+          v-model="rolesFormData"
+          @submit="handleUpdateRoles"
+          :actions="false"
+          v-if="allRoles.length > 0"
+        >
           <FormKit
-            type="form"
-            v-model="userData"
-            @submit="handleUpdateUser"
-            :actions="false"
-            #default="{ state: { valid } }"
-          >
-            <FormKit type="text" name="name" label="Name" validation="required" />
-            <FormKit type="email" name="email" label="Email" validation="required|email" />
-            <FormKit type="text" name="username" label="Username" />
-            <AppButton type="submit" class="mt-4" :disabled="!valid || loading.update">
-              {{ loading.update ? 'Saving...' : 'Save Changes' }}
-            </AppButton>
-          </FormKit>
-        </div>
-
-        <!-- Actions -->
-        <div>
-          <h2 class="text-xl font-semibold text-secondary mb-4">Actions</h2>
-          <div class="space-y-4">
-            <AppButton @click="handleToggleLock" class="w-full" :variant="user.is_locked ? 'secondary' : 'primary'" :disabled="loading.lock">
-              {{ loading.lock ? '...' : (user.is_locked ? 'Unlock Account' : 'Lock Account') }}
-            </AppButton>
-            <AppButton @click="handleDeleteUser" class="w-full bg-red-600 hover:bg-red-700" :disabled="loading.delete">
-              {{ loading.delete ? 'Deleting...' : 'Delete User' }}
-            </AppButton>
-          </div>
-        </div>
+            type="checkbox"
+            name="role_ids"
+            :options="allRoles"
+          />
+          <AppButton type="submit" class="mt-4" :disabled="rolesLoading">
+            {{ rolesLoading ? $t('loading') : $t('save_changes') }}
+          </AppButton>
+          <div v-if="rolesError" class="mt-4 text-red-500">{{ rolesError }}</div>
+          <div v-if="rolesSuccess" class="mt-4 text-green-500">{{ rolesSuccess }}</div>
+        </FormKit>
+        <p v-else class="text-gray-400">{{ $t('no_roles_available') }}</p>
       </div>
 
-      <div v-if="successMessage" class="mt-6 p-4 bg-secondary/20 text-secondary border border-secondary/30 rounded-md">
-        {{ successMessage }}
-      </div>
-      <div v-if="errorMessage" class="mt-6 p-4 bg-red-500/20 text-red-400 border border-red-500/30 rounded-md">
-        {{ errorMessage }}
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useApi } from '~/composables/useApi';
-import { useRoute, useRouter } from 'vue-router';
 
 definePageMeta({
-  middleware: ['auth', 'admin'],
-  layout: 'default',
+  layout: 'admin',
+  middleware: 'admin'
 });
 
 const route = useRoute();
-const router = useRouter();
+const { t } = useI18n();
 const userId = route.params.id;
 
-const userData = ref({});
-const loading = ref({ update: false, lock: false, delete: false });
-const successMessage = ref('');
-const errorMessage = ref('');
+const user = ref(null);
+const formData = ref({});
+const loading = ref(false);
+const updateError = ref(null);
+const updateSuccess = ref(null);
 
-const { data: user, pending, error, refresh } = await useApi(`/auth/users/${userId}`, {
-  lazy: true,
-  onResponse({ response }) {
-    userData.value = {
-      name: response._data.name,
-      email: response._data.email,
-      username: response._data.username,
-    };
-  },
+// Fetch user data
+const { data, pending, error } = await useApi(`/auth/users/${userId}`);
+
+if (data.value) {
+  user.value = data.value;
+  formData.value = {
+    name: user.value.name,
+    email: user.value.email,
+    username: user.value.username,
+  };
+}
+
+const handleUpdateUser = async (updatedData) => {
+  loading.value = true;
+  updateError.value = null;
+  updateSuccess.value = null;
+  try {
+    const updatedUser = await useApi(`/auth/users/${userId}`, {
+      method: 'PUT',
+      body: updatedData,
+    });
+    user.value = updatedUser; // Update local user data
+    updateSuccess.value = t('user_update_success');
+  } catch (err) {
+    updateError.value = err.data?.message || t('user_update_failed');
+  } finally {
+    loading.value = false;
+  }
+};
+
+// --- Role Management ---
+const allRoles = ref([]);
+const rolesLoading = ref(false);
+const rolesError = ref(null);
+const rolesSuccess = ref(null);
+
+// Fetch all available roles
+const { data: rolesData } = await useApi('/auth/roles');
+if (rolesData.value) {
+  allRoles.value = rolesData.value.map(role => ({
+    label: role.display_name,
+    value: role.id
+  }));
+}
+
+// Separate form model for roles
+const rolesFormData = ref({
+  role_ids: user.value?.roles.map(r => r.id) || []
 });
 
-const handleUpdateUser = async (formData) => {
-  loading.value.update = true;
-  successMessage.value = '';
-  errorMessage.value = '';
-  try {
-    await useApi(`/auth/users/${userId}`, { method: 'PUT', body: formData });
-    successMessage.value = 'User updated successfully!';
-    refresh(); // Refresh user data
-  } catch (err) {
-    errorMessage.value = err.data?.message || 'Failed to update user.';
-  } finally {
-    loading.value.update = false;
-  }
-};
+const handleUpdateRoles = async () => {
+  rolesLoading.value = true;
+  rolesError.value = null;
+  rolesSuccess.value = null;
 
-const handleToggleLock = async () => {
-  loading.value.lock = true;
-  successMessage.value = '';
-  errorMessage.value = '';
-  try {
-    await useApi(`/auth/users/${userId}/toggle-lock`, { method: 'POST' });
-    successMessage.value = `User account ${user.value.is_locked ? 'unlocked' : 'locked'} successfully!`;
-    refresh(); // Refresh user data
-  } catch (err) {
-    errorMessage.value = err.data?.message || 'Failed to toggle lock status.';
-  } finally {
-    loading.value.lock = false;
-  }
-};
+  const initialRoleIds = new Set(user.value?.roles.map(r => r.id) || []);
+  const newRoleIds = new Set(rolesFormData.value.role_ids);
 
-const handleDeleteUser = async () => {
-  if (!confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) {
-    return;
-  }
-  loading.value.delete = true;
-  errorMessage.value = '';
+  const rolesToAssign = [...newRoleIds].filter(id => !initialRoleIds.has(id));
+  const rolesToRemove = [...initialRoleIds].filter(id => !newRoleIds.has(id));
+
   try {
-    await useApi(`/auth/users/${userId}`, { method: 'DELETE' });
-    alert('User deleted successfully.');
-    router.push('/admin/users');
+    // Perform all API calls concurrently
+    await Promise.all([
+      ...rolesToAssign.map(roleId => useApi(`/auth/roles/user/${userId}/assign`, { method: 'POST', body: { role_id: roleId } })),
+      ...rolesToRemove.map(roleId => useApi(`/auth/roles/user/${userId}/remove`, { method: 'POST', body: { role_id: roleId } }))
+    ]);
+
+    // Refresh user data to get the latest roles
+    const updatedUser = await useApi(`/auth/users/${userId}`);
+    user.value = updatedUser;
+    rolesFormData.value.role_ids = user.value?.roles.map(r => r.id) || [];
+
+    rolesSuccess.value = t('roles_update_success');
   } catch (err) {
-    errorMessage.value = err.data?.message || 'Failed to delete user.';
-    loading.value.delete = false;
+    rolesError.value = err.data?.message || t('roles_update_failed');
+  } finally {
+    rolesLoading.value = false;
   }
 };
 </script>

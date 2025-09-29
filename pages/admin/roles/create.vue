@@ -1,114 +1,110 @@
 <template>
-  <div class="p-8 rounded-lg bg-dark-bg/50 border border-gray-800">
-    <h1 class="text-3xl font-bold text-primary mb-6">Create New Role</h1>
+  <div>
+    <h1 class="text-2xl font-bold mb-6">{{ $t('create_role_title') }}</h1>
 
-    <div v-if="pending" class="text-center">
-      <p>Loading permissions...</p>
-    </div>
-    <div v-else-if="error" class="text-center text-red-500">
-      <p>Failed to load necessary data. Please try again.</p>
-    </div>
-    <div v-else>
+    <FormKit
+      type="form"
+      v-model="formData"
+      @submit="handleCreateRole"
+      :actions="false"
+    >
       <FormKit
-        type="form"
-        @submit="handleCreateRole"
-        :actions="false"
-        #default="{ state: { valid } }"
-      >
-        <FormKit
-          type="text"
-          name="display_name"
-          label="Display Name"
-          placeholder="e.g., Content Editor"
-          validation="required"
-        />
-        <FormKit
-          type="text"
-          name="name"
-          label="Internal Name (slug)"
-          placeholder="e.g., content-editor"
-          validation="required|alpha_dash"
-          help="Use only letters, numbers, dashes, and underscores."
-        />
+        type="text"
+        name="display_name"
+        :label="$t('role_display_name')"
+        validation="required"
+      />
+      <FormKit
+        type="text"
+        name="name"
+        :label="$t('role_name')"
+        validation="required|alpha:latin"
+        help="فقط حروف انگلیسی و خط تیره (-)"
+      />
+      <FormKit
+        type="textarea"
+        name="description"
+        :label="$t('role_description')"
+      />
 
-        <h2 class="text-xl font-semibold text-secondary mt-8 mb-4">Assign Permissions</h2>
-        <div class="space-y-6">
-          <div v-for="(group, groupName) in permissions" :key="groupName" class="p-4 border border-gray-700 rounded-lg">
-            <h3 class="text-lg font-semibold text-light-gray mb-3">{{ groupName }}</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <FormKit
-                type="checkbox"
-                name="permission_ids"
-                :options="group"
-                decorator-class="mr-2"
-              />
-            </div>
+      <!-- Permissions -->
+      <div class="mt-6">
+        <h2 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">{{ $t('assign_permissions') }}</h2>
+        <div v-if="permissionsPending" class="text-center">{{ $t('loading') }}</div>
+        <div v-else-if="permissionsError" class="text-red-500">{{ $t('permissions_fetch_error') }}</div>
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div v-for="(group, groupName) in groupedPermissions" :key="groupName" class="bg-gray-800 p-4 rounded-lg">
+            <h3 class="font-bold text-lg mb-3">{{ groupName }}</h3>
+            <FormKit
+              type="checkbox"
+              name="permission_ids"
+              :options="group"
+            />
           </div>
         </div>
-
-        <AppButton type="submit" class="mt-8" :disabled="!valid || loading">
-          {{ loading ? 'Creating...' : 'Create Role' }}
-        </AppButton>
-      </FormKit>
-
-      <div v-if="successMessage" class="mt-6 p-4 bg-secondary/20 text-secondary border border-secondary/30 rounded-md">
-        {{ successMessage }}
       </div>
-      <div v-if="errorMessage" class="mt-6 p-4 bg-red-500/20 text-red-400 border border-red-500/30 rounded-md">
-        {{ errorMessage }}
-      </div>
-    </div>
+
+      <AppButton type="submit" class="mt-6" :disabled="loading">
+        {{ loading ? $t('loading') : $t('save_changes') }}
+      </AppButton>
+      <div v-if="error" class="mt-4 text-red-500">{{ error }}</div>
+
+    </FormKit>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useApi } from '~/composables/useApi';
-import { useRouter } from 'vue-router';
+import { ref, computed } from 'vue';
 
 definePageMeta({
-  middleware: ['auth', 'admin'],
-  layout: 'default',
+  layout: 'admin',
+  middleware: 'admin'
 });
 
+const { t } = useI18n();
 const router = useRouter();
-const loading = ref(false);
-const successMessage = ref('');
-const errorMessage = ref('');
 
-// Fetch permissions and transform them for FormKit options
-const { data: permissions, pending, error } = await useApi('/auth/permissions', {
-  lazy: true,
-  transform: (data) => {
-    // The API returns a grouped object, let's format it for FormKit checkbox options { label, value }
-    const formatted = {};
-    for (const groupName in data) {
-      formatted[groupName] = data[groupName].map(p => ({
-        label: p.display_name,
-        value: p.id
-      }));
+const formData = ref({
+  name: '',
+  display_name: '',
+  description: '',
+  permission_ids: []
+});
+const loading = ref(false);
+const error = ref(null);
+
+// Fetch permissions
+const { data: permissions, pending: permissionsPending, error: permissionsError } = await useApi('/auth/permissions');
+
+const groupedPermissions = computed(() => {
+  if (!permissions.value) return {};
+  return permissions.value.reduce((acc, permission) => {
+    const group = permission.group || 'General';
+    if (!acc[group]) {
+      acc[group] = [];
     }
-    return formatted;
-  }
+    acc[group].push({
+      label: permission.display_name,
+      value: permission.id,
+      help: permission.description
+    });
+    return acc;
+  }, {});
 });
 
-const handleCreateRole = async (formData) => {
+const handleCreateRole = async (data) => {
   loading.value = true;
-  successMessage.value = '';
-  errorMessage.value = '';
-
+  error.value = null;
   try {
     await useApi('/auth/roles', {
       method: 'POST',
-      body: {
-        ...formData,
-        permission_ids: formData.permission_ids || [], // Ensure it's an array
-      },
+      body: data
     });
-    successMessage.value = 'Role created successfully! Redirecting...';
-    setTimeout(() => router.push('/admin/roles'), 2000);
+    alert(t('role_create_success'));
+    router.push('/admin/roles');
   } catch (err) {
-    errorMessage.value = err.data?.message || 'Failed to create role.';
+    error.value = err.data?.message || t('role_create_failed');
+  } finally {
     loading.value = false;
   }
 };

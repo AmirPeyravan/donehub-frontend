@@ -1,5 +1,6 @@
 <template>
   <div>
+    <h1 class="text-2xl font-bold text-center mb-4">{{ $t('login_page_title') }}</h1>
     <FormKit
       type="form"
       @submit="handleLogin"
@@ -8,19 +9,19 @@
       <FormKit
         type="text"
         name="identifier"
-        label="Email or Mobile"
-        placeholder="Enter your email or mobile"
+        :label="$t('email_or_mobile')"
+        :placeholder="$t('enter_email_or_mobile')"
         validation="required"
       />
       <FormKit
         type="password"
         name="password"
-        label="Password"
-        placeholder="Enter your password"
+        :label="$t('password')"
+        :placeholder="$t('enter_password')"
         validation="required"
       />
       <AppButton type="submit" class="w-full mt-4" :disabled="loading">
-        {{ loading ? 'Logging in...' : 'Login' }}
+        {{ loading ? $t('logging_in') : $t('login') }}
       </AppButton>
 
       <div v-if="error" class="mt-4 text-red-500 text-center">

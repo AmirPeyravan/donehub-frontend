@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center justify-center min-h-screen">
-    <p class="text-lg text-dark-gray">Redirecting...</p>
+    <p class="text-lg text-dark-gray">{{ $t('redirecting') }}</p>
   </div>
 </template>
 

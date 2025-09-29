@@ -8,7 +8,7 @@
       <div class="bg-dark-bg/60 backdrop-blur-sm border border-gray-800 rounded-lg shadow-lg p-8">
         <div class="text-center mb-8">
           <h1 class="text-3xl font-bold text-primary">DoneHub</h1>
-          <p class="text-dark-gray">Welcome to the future of productivity</p>
+          <p class="text-dark-gray">{{ $t('auth_layout_welcome') }}</p>
         </div>
         <slot />
       </div>

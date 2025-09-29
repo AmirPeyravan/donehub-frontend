@@ -9,8 +9,23 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss',
     '@formkit/nuxt',
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@nuxtjs/i18n'
   ],
+
+  i18n: {
+    locales: [
+      {
+        code: 'fa',
+        iso: 'fa-IR',
+        name: 'فارسی',
+        dir: 'rtl'
+      }
+    ],
+    defaultLocale: 'fa',
+    strategy: 'no_prefix',
+    vueI18n: './i18n.config.ts' // a path to the vue-i18n config file
+  },
 
   tailwindcss: {
     cssPath: '~/assets/css/main.css',

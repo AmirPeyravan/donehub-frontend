@@ -1,9 +1,17 @@
+<script setup lang="ts">
+const { locale, dir } = useI18n()
+
+// Set HTML attributes for language and direction
+useHead({
+  htmlAttrs: {
+    lang: locale,
+    dir: dir
+  }
+})
+</script>
+
 <template>
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
 </template>
-
-<script setup lang="ts">
-// This is the main app file for Nuxt 4
-</script>
