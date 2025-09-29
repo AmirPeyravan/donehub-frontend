@@ -1,25 +1,88 @@
 <template>
-  <div>
-    <h1>صفحه اصلی</h1>
-    <nav>
+  <div class="container">
+    <h1 class="title">به پروژه من خوش آمدید</h1>
+    <p class="subtitle">این یک صفحه اصلی زیبا با تم بنفش است.</p>
+    <nav class="navigation">
       <NuxtLink to="/dashboard">
-        <button>رفتن به داشبورد</button>
+        <button class="btn btn-primary">داشبورد</button>
       </NuxtLink>
       <NuxtLink to="/auth">
-        <button>رفتن به صفحه احراز هویت</button>
+        <button class="btn btn-secondary">ورود و ثبت‌نام</button>
       </NuxtLink>
     </nav>
   </div>
 </template>
 
 <style>
-nav {
-  margin-top: 20px;
+/* Global styles for a modern look */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
-button {
-  margin-right: 10px;
-  padding: 10px 15px;
-  font-size: 16px;
+
+.container {
+  text-align: center;
+  background-color: white;
+  padding: 50px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 2.5rem;
+  color: #5a4bcf; /* A nice shade of purple */
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.navigation {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.btn {
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: white;
+}
+
+.btn-primary {
+  background-color: #7c3aed; /* Vibrant purple */
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+}
+
+.btn-primary:hover {
+  background-color: #6d28d9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+}
+
+.btn-secondary {
+  background-color: #a78bfa; /* Lighter purple */
+  box-shadow: 0 4px 14px rgba(167, 139, 250, 0.3);
+}
+
+.btn-secondary:hover {
+  background-color: #8b5cf6;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
 }
 </style>
