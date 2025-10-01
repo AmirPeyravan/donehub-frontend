@@ -1,24 +1,5 @@
 <template>
   <div class="page-container">
-    <header class="header">
-      <div class="logo">
-        طراحی سایت و کامپیوتر
-      </div>
-      <nav>
-        <ul>
-          <li><a href="#">خانه</a></li>
-          <li><a href="#">طراحی سایت</a></li>
-          <li><a href="#">پشتیبانی سایت</a></li>
-          <li><a href="#">درباره ما</a></li>
-          <li><a href="#">تماس با ما</a></li>
-        </ul>
-      </nav>
-    </header>
-
-    <main class="container">
-      <img src="/purple-monster.png" alt="Cute Purple Monster" class="monster-image" />
-      <h1 class="title">به وبسایت ما خوش آمدید</h1>
-      <p class="subtitle">این یک صفحه اصلی زیبا با تم بنفش است.</p>
 
       <!-- SVG خرگوش -->
       <div class="rabbit-container">
@@ -51,14 +32,6 @@ body {
   margin: 0;
   direction: rtl;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f4f0f8;
-}
-
-/* هدر */
-.header {
-  background: linear-gradient(to right, #8A2BE2, #4B0082);
-  color: white;
-  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -100,11 +73,6 @@ nav a:hover {
 .container {
   text-align: center;
   padding: 40px 20px;
-}
-
-.monster-image {
-  width: 120px;
-  margin-bottom: 20px;
 }
 
 .title {
