@@ -1,7 +1,6 @@
 <template>
   <div class="page-container">
     <div class="container">
-      <img src="/purple-monster.png" alt="Cute Purple Monster" class="monster-image" />
       <h1 class="title">به پروژه من خوش آمدید</h1>
 
       <!-- Inline SVG for the animated rabbit -->
@@ -57,10 +56,6 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.monster-image {
-  width: 150px;
-  margin-bottom: 20px;
-}
 
 .title {
   font-size: 2.5rem;
