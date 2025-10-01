@@ -23,7 +23,6 @@
         </svg>
       </div>
 
-      <p class="subtitle">این یک صفحه اصلی زیبا با تم بنفش است.</p>
       <nav class="navigation">
         <NuxtLink to="/dashboard">
           <button class="btn btn-primary">داشبورد</button>
@@ -40,7 +39,7 @@
 /* Scoped styles for the index page */
 .page-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f0f2f5;
+  background-color: #ede9fe; /* Light purple background */
   color: #333;
   display: flex;
   justify-content: center;
