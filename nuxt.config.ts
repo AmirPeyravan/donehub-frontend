@@ -1,15 +1,17 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
-  devtools: { enabled: true },
+  
+  devtools: { 
+    enabled: true 
+  },
 
   modules: [
     '@nuxtjs/tailwindcss',
-    '@pinia/nuxt',
-    '@vueuse/nuxt'
+    '@pinia/nuxt'
   ],
 
-  css: ['~/assets/css/main.css'],
+  css: ['@/assets/css/main.css'],
 
   runtimeConfig: {
     public: {
@@ -33,5 +35,15 @@ export default defineNuxtConfig({
     configPath: 'tailwind.config.ts',
     exposeConfig: false,
     viewer: true,
+  },
+
+  typescript: {
+    strict: false,
+    shim: false,
+    typeCheck: false
+  },
+
+  imports: {
+    dirs: ['stores']
   }
 })
