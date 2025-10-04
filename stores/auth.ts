@@ -17,8 +17,7 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    // This action handles both login and register responses
-    private setAuth(user: User, token: string) {
+    setAuth(user: User, token: string) {
       this.user = user
       this.token = token
     },
@@ -65,6 +64,5 @@ export const useAuthStore = defineStore('auth', {
     },
   },
 
-  // Enable persistence for this store
   persist: true,
 })

@@ -1,8 +1,12 @@
 <script setup lang="ts">
-// Initialize auth on app mount
+import { onMounted } from 'vue'
+// از مسیر نسبی مستقیم استفاده کن
+import { useAuthStore } from '../stores/auth'
+
 const authStore = useAuthStore()
+
 onMounted(() => {
-  authStore.initializeAuth()
+  authStore.initializeAuth?.()
 })
 </script>
 

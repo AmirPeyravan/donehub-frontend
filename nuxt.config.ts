@@ -1,21 +1,33 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+import { defineNuxtConfig } from 'nuxt/config'
+import { fileURLToPath } from 'node:url'
+import tsconfigPaths from 'vite-tsconfig-paths'
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
-  
-  devtools: { 
-    enabled: true 
-  },
+  devtools: { enabled: true },
 
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt'
-    // '@pinia-plugin-persistedstate/nuxt' has been removed and is now configured as a plugin
   ],
 
-  css: ['~/assets/css/main.css'],
+  css: [fileURLToPath(new URL('./assets/css/main.css', import.meta.url))],
+
+  vite: {
+    plugins: [tsconfigPaths()],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./', import.meta.url))
+      }
+    }
+  },
 
   pinia: {
-    autoImports: ['defineStore', 'acceptHMRUpdate'],
+    autoImports: ['defineStore', 'acceptHMRUpdate']
+  },
+
+  imports: {
+    dirs: ['stores']
   },
 
   runtimeConfig: {
@@ -36,19 +48,14 @@ export default defineNuxtConfig({
   },
 
   tailwindcss: {
-    // cssPath has been removed to avoid conflicts. The global CSS is loaded above.
     configPath: 'tailwind.config.ts',
     exposeConfig: false,
-    viewer: true,
+    viewer: true
   },
 
   typescript: {
     strict: false,
     shim: false,
-    typeCheck: false // Disabled to speed up dev server startup
-  },
-
-  imports: {
-    dirs: ['stores']
+    typeCheck: false
   }
 })

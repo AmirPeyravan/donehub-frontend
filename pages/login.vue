@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import LoginForm from '~/components/forms/LoginForm.vue'
+
 definePageMeta({
   layout: 'auth',
   middleware: 'guest'
@@ -13,7 +15,7 @@ useHead({
 </script>
 
 <template>
-  <div>
+  <div class="min-h-screen flex items-center justify-center bg-gray-100">
     <LoginForm />
   </div>
 </template>
