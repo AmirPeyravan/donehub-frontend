@@ -9,9 +9,14 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt'
+    // '@pinia-plugin-persistedstate/nuxt' has been removed and is now configured as a plugin
   ],
 
-  css: ['@/assets/css/main.css'],
+  css: ['~/assets/css/main.css'],
+
+  pinia: {
+    autoImports: ['defineStore', 'acceptHMRUpdate'],
+  },
 
   runtimeConfig: {
     public: {
@@ -31,7 +36,7 @@ export default defineNuxtConfig({
   },
 
   tailwindcss: {
-    cssPath: '~/assets/css/main.css',
+    // cssPath has been removed to avoid conflicts. The global CSS is loaded above.
     configPath: 'tailwind.config.ts',
     exposeConfig: false,
     viewer: true,
@@ -40,7 +45,7 @@ export default defineNuxtConfig({
   typescript: {
     strict: false,
     shim: false,
-    typeCheck: false
+    typeCheck: false // Disabled to speed up dev server startup
   },
 
   imports: {

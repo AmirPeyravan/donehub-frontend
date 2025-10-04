@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '~/stores/auth'
+
 definePageMeta({
   layout: 'default',
   middleware: 'auth'
 })
-
-const { user } = useAuth()
 
 useHead({
   title: 'Dashboard - Auth App',
@@ -13,8 +14,15 @@ useHead({
   ]
 })
 
+const authStore = useAuthStore()
+// Use storeToRefs to get a reactive ref to the user
+const { user } = storeToRefs(authStore)
+
 const formattedDate = computed(() => {
   if (!user.value?.created_at) return ''
+  // The API doc doesn't specify a created_at for the user object,
+  // but the old code used it. I'll keep it for now and assume it exists.
+  // If not, it will just display an empty string.
   return new Date(user.value.created_at).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -26,7 +34,7 @@ const formattedDate = computed(() => {
 <template>
   <div class="space-y-8">
     <div>
-      <h1 class="text-3xl font-bold text-text-primary mb-2">Welcome back!</h1>
+      <h1 class="text-3xl font-bold text-text-primary mb-2">Welcome back, {{ user?.username }}!</h1>
       <p class="text-text-secondary">Here's your account information</p>
     </div>
     

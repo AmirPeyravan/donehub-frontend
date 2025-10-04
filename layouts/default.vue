@@ -1,8 +1,12 @@
 <script setup lang="ts">
-const { user, logout } = useAuth()
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '~/stores/auth'
+
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
 
 const handleLogout = async () => {
-  await logout()
+  await authStore.logout()
 }
 </script>
 
@@ -12,10 +16,10 @@ const handleLogout = async () => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center">
-            <h1 class="text-xl font-bold text-primary">Auth App</h1>
+            <NuxtLink to="/" class="text-xl font-bold text-primary">Auth App</NuxtLink>
           </div>
           
-          <div class="flex items-center gap-4">
+          <div v-if="authStore.isAuthenticated" class="flex items-center gap-4">
             <div class="text-sm">
               <span class="text-text-muted">Welcome,</span>
               <span class="font-medium text-text-primary ml-1">{{ user?.username }}</span>
@@ -41,6 +45,7 @@ const handleLogout = async () => {
       <p>&copy; 2025 Auth App. All rights reserved.</p>
     </footer>
     
+    <!-- This component will display notifications from useNotification -->
     <NotificationToast />
   </div>
 </template>

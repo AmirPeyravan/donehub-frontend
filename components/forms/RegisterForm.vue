@@ -1,6 +1,10 @@
 <script setup lang="ts">
-const { register, loading } = useAuth()
-const { error: notifError, success } = useNotification()
+import { useAuthStore } from '~/stores/auth'
+import { useNotification } from '~/composables/useNotification'
+
+const authStore = useAuthStore()
+const { success, error: notifError } = useNotification()
+const router = useRouter()
 
 const form = reactive({
   username: '',
@@ -8,12 +12,54 @@ const form = reactive({
   passwordConfirm: ''
 })
 
-const errors = reactive({
-  username: '',
-  password: '',
-  passwordConfirm: ''
-})
+const passwordMatchError = ref('')
 
+// Use useAsyncData to handle the registration process
+const { execute: handleRegister, pending, error } = useAsyncData(
+  'register',
+  async () => {
+    // Clear previous errors
+    error.value = null
+    passwordMatchError.value = ''
+
+    // Client-side check for password match
+    if (form.password !== form.passwordConfirm) {
+      passwordMatchError.value = 'Passwords do not match'
+      // Throw an error to stop the async data process
+      throw new Error(passwordMatchError.value)
+    }
+
+    // Call the store action
+    await authStore.register({
+      username: form.username,
+      password: form.password
+    })
+  },
+  {
+    immediate: false, // Don't run on component mount
+    watch: [], // Don't re-run when dependencies change
+  }
+)
+
+const handleSubmit = async () => {
+  await handleRegister().catch(() => {
+    // This catch block handles the client-side password match error
+    if (passwordMatchError.value) {
+      notifError(passwordMatchError.value)
+    }
+  })
+
+  // Check for errors from the API call
+  if (error.value) {
+    const errorMessage = error.value.data?.message || 'An unknown error occurred.'
+    notifError(errorMessage)
+  } else if (authStore.isAuthenticated) {
+    success('Registration successful! Redirecting...')
+    await router.push('/')
+  }
+}
+
+// Keep the password strength indicator as it's good UX
 const passwordStrength = computed(() => {
   const pwd = form.password
   if (!pwd) return { level: 0, text: '', color: '' }
@@ -36,55 +82,6 @@ const passwordStrength = computed(() => {
   
   return levels[strength]
 })
-
-const validate = () => {
-  let isValid = true
-  
-  errors.username = ''
-  errors.password = ''
-  errors.passwordConfirm = ''
-  
-  if (!form.username.trim()) {
-    errors.username = 'Username is required'
-    isValid = false
-  } else if (form.username.length > 255) {
-    errors.username = 'Username must be less than 255 characters'
-    isValid = false
-  }
-  
-  if (!form.password) {
-    errors.password = 'Password is required'
-    isValid = false
-  } else if (form.password.length < 6) {
-    errors.password = 'Password must be at least 6 characters'
-    isValid = false
-  }
-  
-  if (!form.passwordConfirm) {
-    errors.passwordConfirm = 'Please confirm your password'
-    isValid = false
-  } else if (form.password !== form.passwordConfirm) {
-    errors.passwordConfirm = 'Passwords do not match'
-    isValid = false
-  }
-  
-  return isValid
-}
-
-const handleSubmit = async () => {
-  if (!validate()) return
-  
-  const result = await register({
-    username: form.username,
-    password: form.password
-  })
-  
-  if (result.success) {
-    success(result.message)
-  } else {
-    notifError(result.message)
-  }
-}
 </script>
 
 <template>
@@ -98,9 +95,9 @@ const handleSubmit = async () => {
       v-model="form.username"
       label="Username"
       placeholder="Choose a username"
-      :error="errors.username"
       required
       maxlength="255"
+      autocomplete="username"
     />
     
     <div>
@@ -109,10 +106,10 @@ const handleSubmit = async () => {
         type="password"
         label="Password"
         placeholder="Choose a strong password"
-        :error="errors.password"
         required
+        autocomplete="new-password"
       />
-      <p v-if="form.password && !errors.password" :class="['text-xs mt-1', passwordStrength.color]">
+      <p v-if="form.password" :class="['text-xs mt-1', passwordStrength.color]">
         Strength: {{ passwordStrength.text }}
       </p>
     </div>
@@ -122,17 +119,18 @@ const handleSubmit = async () => {
       type="password"
       label="Confirm Password"
       placeholder="Re-enter your password"
-      :error="errors.passwordConfirm"
+      :error="passwordMatchError"
       required
+      autocomplete="new-password"
     />
     
     <BaseButton
       type="submit"
-      :loading="loading"
-      :disabled="loading"
+      :loading="pending"
+      :disabled="pending"
       full-width
     >
-      {{ loading ? 'Creating account...' : 'Register' }}
+      {{ pending ? 'Creating account...' : 'Register' }}
     </BaseButton>
     
     <p class="text-center text-sm text-text-muted">

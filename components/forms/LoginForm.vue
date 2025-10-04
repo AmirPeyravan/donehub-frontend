@@ -1,51 +1,45 @@
 <script setup lang="ts">
-const { login, loading } = useAuth()
-const { error: notifError, success } = useNotification()
+import { useAuthStore } from '~/stores/auth'
+import { useNotification } from '~/composables/useNotification'
+
+const authStore = useAuthStore()
+const { success, error: notifError } = useNotification()
+const router = useRouter()
 
 const form = reactive({
   username: '',
   password: ''
 })
 
-const errors = reactive({
-  username: '',
-  password: ''
-})
+// Use useAsyncData to handle the login process
+const { execute: handleLogin, pending, error } = useAsyncData(
+  'login',
+  async () => {
+    // Clear previous errors
+    error.value = null
 
-const validate = () => {
-  let isValid = true
-  
-  errors.username = ''
-  errors.password = ''
-  
-  if (!form.username.trim()) {
-    errors.username = 'Username is required'
-    isValid = false
+    // Call the store action
+    await authStore.login({
+      username: form.username,
+      password: form.password
+    })
+  },
+  {
+    immediate: false, // Don't run on component mount
+    watch: [], // Don't re-run when dependencies change
   }
-  
-  if (!form.password) {
-    errors.password = 'Password is required'
-    isValid = false
-  } else if (form.password.length < 6) {
-    errors.password = 'Password must be at least 6 characters'
-    isValid = false
-  }
-  
-  return isValid
-}
+)
 
 const handleSubmit = async () => {
-  if (!validate()) return
-  
-  const result = await login({
-    username: form.username,
-    password: form.password
-  })
-  
-  if (result.success) {
-    success(result.message)
-  } else {
-    notifError(result.message)
+  await handleLogin()
+
+  // Check for errors from the API call
+  if (error.value) {
+    const errorMessage = error.value.data?.message || 'An unknown error occurred.'
+    notifError(errorMessage)
+  } else if (authStore.isAuthenticated) {
+    success('Login successful! Redirecting...')
+    await router.push('/')
   }
 }
 </script>
@@ -61,9 +55,9 @@ const handleSubmit = async () => {
       v-model="form.username"
       label="Username"
       placeholder="Enter your username"
-      :error="errors.username"
       required
       maxlength="255"
+      autocomplete="username"
     />
     
     <BaseInput
@@ -71,17 +65,17 @@ const handleSubmit = async () => {
       type="password"
       label="Password"
       placeholder="Enter your password"
-      :error="errors.password"
       required
+      autocomplete="current-password"
     />
     
     <BaseButton
       type="submit"
-      :loading="loading"
-      :disabled="loading"
+      :loading="pending"
+      :disabled="pending"
       full-width
     >
-      {{ loading ? 'Logging in...' : 'Login' }}
+      {{ pending ? 'Logging in...' : 'Login' }}
     </BaseButton>
     
     <p class="text-center text-sm text-text-muted">
